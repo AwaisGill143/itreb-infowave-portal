@@ -8,6 +8,9 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./components/LoginPage";
 import JoinPage from "./components/JoinPage";
+import Dashboard from "./pages/Dashboard";
+import AddEvent from "./pages/AddEvent";
+import CreateOpportunity from "./pages/CreateOpportunity";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +24,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/join" element={<JoinPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/add-event" element={<AddEvent />} />
+          <Route path="/create-opportunity" element={<CreateOpportunity />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

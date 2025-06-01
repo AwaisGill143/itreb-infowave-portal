@@ -4,15 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Login attempted with:", { email, password });
-    // Add login logic here
+    // Add login logic here - for now, just redirect to dashboard
+    navigate("/dashboard");
   };
 
   return (
@@ -78,7 +81,7 @@ const LoginPage = () => {
               <p className="text-gray-600">
                 Don't have an account?{" "}
                 <button 
-                  onClick={() => window.location.href = '/join'}
+                  onClick={() => navigate('/join')}
                   className="text-religious-600 hover:text-religious-700 font-medium"
                 >
                   Join ITREB
