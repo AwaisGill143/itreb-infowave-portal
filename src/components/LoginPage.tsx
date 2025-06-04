@@ -5,17 +5,34 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login attempted with:", { email, password });
-    // Add login logic here - for now, just redirect to dashboard
-    navigate("/dashboard");
+    setLoading(true);
+
+    try {
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        toast.error("Login failed: " + error.message);
+      } else {
+        toast.success("Login successful!");
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,6 +70,7 @@ const LoginPage = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="border-gray-300 focus:border-religious-500 focus:ring-religious-500"
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -66,14 +84,16 @@ const LoginPage = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="border-gray-300 focus:border-religious-500 focus:ring-religious-500"
                   required
+                  disabled={loading}
                 />
               </div>
 
               <Button 
                 type="submit" 
                 className="w-full bg-religious-600 hover:bg-religious-700 text-white py-3"
+                disabled={loading}
               >
-                Login
+                {loading ? "Signing in..." : "Login"}
               </Button>
             </form>
 

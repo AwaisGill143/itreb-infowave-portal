@@ -6,18 +6,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Plus, Minus, Download, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { profile, signOut } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [todos, setTodos] = useState<string[]>([]);
   const [newTodo, setNewTodo] = useState("");
-
-  // Mock board member data - in real app this would come from authentication
-  const boardMember = {
-    name: "John Doe",
-    portfolio: "Technology"
-  };
 
   const addTodo = () => {
     if (newTodo.trim()) {
@@ -31,20 +28,31 @@ const Dashboard = () => {
   };
 
   const handleViewApplicants = () => {
-    // In real app, this would generate and download Excel with portfolio-specific data
-    console.log(`Downloading applicants for ${boardMember.portfolio} portfolio`);
-    alert(`Downloading applicants for ${boardMember.portfolio} portfolio`);
+    if (profile?.role !== 'board_member') {
+      toast.error("Only board members can view applicants");
+      return;
+    }
+    console.log(`Downloading applicants for ${profile.portfolio} portfolio`);
+    toast.success(`Downloading applicants for ${profile.portfolio} portfolio`);
   };
 
   const handleResourceLibrary = () => {
-    // In real app, this would download the actual PDF
     console.log("Downloading resource library PDF");
-    alert("Downloading resource library PDF");
+    toast.success("Downloading resource library PDF");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut();
     navigate("/login");
   };
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Loading profile...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -60,20 +68,24 @@ const Dashboard = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <Button 
-                onClick={() => navigate("/create-opportunity")}
-                className="bg-religious-600 hover:bg-religious-700"
-              >
-                Create Opportunity
-              </Button>
-              <Button 
-                onClick={handleViewApplicants}
-                variant="outline"
-                className="border-religious-600 text-religious-600 hover:bg-religious-50"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                View Applicants
-              </Button>
+              {profile.role === 'board_member' && (
+                <>
+                  <Button 
+                    onClick={() => navigate("/create-opportunity")}
+                    className="bg-religious-600 hover:bg-religious-700"
+                  >
+                    Create Opportunity
+                  </Button>
+                  <Button 
+                    onClick={handleViewApplicants}
+                    variant="outline"
+                    className="border-religious-600 text-religious-600 hover:bg-religious-50"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    View Applicants
+                  </Button>
+                </>
+              )}
               <Button 
                 onClick={handleResourceLibrary}
                 variant="outline"
@@ -98,9 +110,14 @@ const Dashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900">
-            Hello {boardMember.name}!
+            Hello {profile.full_name}!
           </h1>
-          <p className="text-gray-600 mt-1">{boardMember.portfolio} Portfolio</p>
+          <p className="text-gray-600 mt-1">
+            {profile.role === 'board_member' 
+              ? `${profile.portfolio} Portfolio` 
+              : 'Welcome to ITREB'
+            }
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -118,21 +135,23 @@ const Dashboard = () => {
                   className="rounded-md border w-full"
                 />
                 
-                {/* Event Actions */}
-                <div className="flex gap-4 mt-6">
-                  <Button 
-                    onClick={() => navigate("/add-event")}
-                    className="bg-religious-600 hover:bg-religious-700"
-                  >
-                    Add Event
-                  </Button>
-                  <Button variant="outline">
-                    Remove Event
-                  </Button>
-                  <Button variant="outline">
-                    Add Images
-                  </Button>
-                </div>
+                {/* Event Actions - Only for board members */}
+                {profile.role === 'board_member' && (
+                  <div className="flex gap-4 mt-6">
+                    <Button 
+                      onClick={() => navigate("/add-event")}
+                      className="bg-religious-600 hover:bg-religious-700"
+                    >
+                      Add Event
+                    </Button>
+                    <Button variant="outline">
+                      Remove Event
+                    </Button>
+                    <Button variant="outline">
+                      Add Images
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

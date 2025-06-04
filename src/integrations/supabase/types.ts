@@ -9,16 +9,170 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      applications: {
+        Row: {
+          applicant_id: string
+          applied_at: string
+          cover_letter: string | null
+          id: string
+          opportunity_id: string
+          resume_url: string | null
+          status: string
+        }
+        Insert: {
+          applicant_id: string
+          applied_at?: string
+          cover_letter?: string | null
+          id?: string
+          opportunity_id: string
+          resume_url?: string | null
+          status?: string
+        }
+        Update: {
+          applicant_id?: string
+          applied_at?: string
+          cover_letter?: string | null
+          id?: string
+          opportunity_id?: string
+          resume_url?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          end_time: string
+          event_date: string
+          id: string
+          start_time: string
+          title: string
+          updated_at: string
+          venue: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_time: string
+          event_date: string
+          id?: string
+          start_time: string
+          title: string
+          updated_at?: string
+          venue: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_time?: string
+          event_date?: string
+          id?: string
+          start_time?: string
+          title?: string
+          updated_at?: string
+          venue?: string
+        }
+        Relationships: []
+      }
+      opportunities: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string
+          duration: string
+          id: string
+          is_active: boolean
+          job_title: string
+          portfolio: Database["public"]["Enums"]["portfolio_type"]
+          skill_requirement: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description: string
+          duration: string
+          id?: string
+          is_active?: boolean
+          job_title: string
+          portfolio: Database["public"]["Enums"]["portfolio_type"]
+          skill_requirement: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string
+          duration?: string
+          id?: string
+          is_active?: boolean
+          job_title?: string
+          portfolio?: Database["public"]["Enums"]["portfolio_type"]
+          skill_requirement?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          portfolio: Database["public"]["Enums"]["portfolio_type"] | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id: string
+          portfolio?: Database["public"]["Enums"]["portfolio_type"] | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          portfolio?: Database["public"]["Enums"]["portfolio_type"] | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
     }
     Enums: {
-      [_ in never]: never
+      portfolio_type:
+        | "technology"
+        | "finance"
+        | "marketing"
+        | "operations"
+        | "hr"
+      user_role: "board_member" | "applicant"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +287,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      portfolio_type: [
+        "technology",
+        "finance",
+        "marketing",
+        "operations",
+        "hr",
+      ],
+      user_role: ["board_member", "applicant"],
+    },
   },
 } as const
