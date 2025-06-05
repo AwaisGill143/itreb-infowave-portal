@@ -13,7 +13,7 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading) {
+    if (loading) {
       if (!user) {
         navigate('/login');
         return;
@@ -26,7 +26,7 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
     }
   }, [user, profile, loading, requiredRole, navigate]);
 
-  if (loading) {
+  if (!loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Loading...</div>
