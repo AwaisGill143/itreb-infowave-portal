@@ -3,29 +3,18 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import { Plus, Minus, Download, LogOut } from "lucide-react";
+import { Download, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useEvents } from "@/hooks/useEvents";
 import { toast } from "sonner";
+import TodoList from "@/components/TodoList";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
+  const { events } = useEvents();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [todos, setTodos] = useState<string[]>([]);
-  const [newTodo, setNewTodo] = useState("");
-
-  const addTodo = () => {
-    if (newTodo.trim()) {
-      setTodos([...todos, newTodo.trim()]);
-      setNewTodo("");
-    }
-  };
-
-  const removeTodo = (index: number) => {
-    setTodos(todos.filter((_, i) => i !== index));
-  };
 
   const handleViewApplicants = () => {
     if (profile?.role !== 'board_member') {
@@ -53,6 +42,13 @@ const Dashboard = () => {
       </div>
     );
   }
+
+  // Get events for the selected date
+  const selectedDateEvents = events.filter(event => {
+    if (!selectedDate) return false;
+    const eventDate = new Date(event.event_date);
+    return eventDate.toDateString() === selectedDate.toDateString();
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -135,6 +131,28 @@ const Dashboard = () => {
                   className="rounded-md border w-full"
                 />
                 
+                {/* Show events for selected date */}
+                {selectedDate && selectedDateEvents.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="text-lg font-semibold mb-2">
+                      Events on {selectedDate.toLocaleDateString()}
+                    </h3>
+                    <div className="space-y-2">
+                      {selectedDateEvents.map((event) => (
+                        <div key={event.id} className="p-3 bg-religious-50 rounded-lg">
+                          <h4 className="font-medium text-religious-800">{event.title}</h4>
+                          <p className="text-sm text-gray-600">
+                            {event.start_time} - {event.end_time} at {event.venue}
+                          </p>
+                          {event.description && (
+                            <p className="text-sm text-gray-700 mt-1">{event.description}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
                 {/* Event Actions - Only for board members */}
                 {profile.role === 'board_member' && (
                   <div className="flex gap-4 mt-6">
@@ -158,45 +176,7 @@ const Dashboard = () => {
 
           {/* Todo List Section */}
           <div className="lg:col-span-1">
-            <Card className="h-fit">
-              <CardHeader>
-                <CardTitle>To-Do List</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {todos.map((todo, index) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-100 p-3 rounded">
-                      <span className="text-sm">{todo}</span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => removeTodo(index)}
-                        className="h-6 w-6 p-0"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add new todo..."
-                      value={newTodo}
-                      onChange={(e) => setNewTodo(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && addTodo()}
-                      className="text-sm"
-                    />
-                    <Button
-                      size="sm"
-                      onClick={addTodo}
-                      className="bg-religious-600 hover:bg-religious-700 shrink-0"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <TodoList />
           </div>
         </div>
       </main>

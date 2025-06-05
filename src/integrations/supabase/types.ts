@@ -11,30 +11,54 @@ export type Database = {
     Tables: {
       applications: {
         Row: {
+          Age: number | null
           applicant_id: string
           applied_at: string
-          cover_letter: string | null
+          Contact: number | null
+          email: string | null
+          "First name": string | null
           id: string
+          "Last Name": string | null
           opportunity_id: string
+          Portfolio: string | null
+          "Religious Qualification": string | null
           resume_url: string | null
+          "Secular Qualification": string | null
+          Skills: string | null
           status: string
         }
         Insert: {
+          Age?: number | null
           applicant_id: string
           applied_at?: string
-          cover_letter?: string | null
+          Contact?: number | null
+          email?: string | null
+          "First name"?: string | null
           id?: string
+          "Last Name"?: string | null
           opportunity_id: string
+          Portfolio?: string | null
+          "Religious Qualification"?: string | null
           resume_url?: string | null
+          "Secular Qualification"?: string | null
+          Skills?: string | null
           status?: string
         }
         Update: {
+          Age?: number | null
           applicant_id?: string
           applied_at?: string
-          cover_letter?: string | null
+          Contact?: number | null
+          email?: string | null
+          "First name"?: string | null
           id?: string
+          "Last Name"?: string | null
           opportunity_id?: string
+          Portfolio?: string | null
+          "Religious Qualification"?: string | null
           resume_url?: string | null
+          "Secular Qualification"?: string | null
+          Skills?: string | null
           status?: string
         }
         Relationships: [
@@ -55,6 +79,7 @@ export type Database = {
           end_time: string
           event_date: string
           id: string
+          image_urls: string[] | null
           start_time: string
           title: string
           updated_at: string
@@ -67,6 +92,7 @@ export type Database = {
           end_time: string
           event_date: string
           id?: string
+          image_urls?: string[] | null
           start_time: string
           title: string
           updated_at?: string
@@ -79,6 +105,7 @@ export type Database = {
           end_time?: string
           event_date?: string
           id?: string
+          image_urls?: string[] | null
           start_time?: string
           title?: string
           updated_at?: string
@@ -152,6 +179,33 @@ export type Database = {
           portfolio?: Database["public"]["Enums"]["portfolio_type"] | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      todos: {
+        Row: {
+          completed: boolean
+          content: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          content: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          content?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
