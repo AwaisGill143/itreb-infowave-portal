@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -26,7 +25,8 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
     }
   }, [user, profile, loading, requiredRole, navigate]);
 
-  if (!loading) {
+  // ✅ Show loader while loading
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Loading...</div>
@@ -34,14 +34,12 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
     );
   }
 
-  if (!user) {
+  // ✅ If not logged in or role doesn't match, don't flash UI
+  if (!user || (requiredRole && profile?.role !== requiredRole)) {
     return null;
   }
 
-  if (requiredRole && profile?.role !== requiredRole) {
-    return null;
-  }
-
+  // ✅ All good, show the protected content
   return <>{children}</>;
 };
 
