@@ -15,7 +15,7 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   useEffect(() => {
     if (loading) {
       if (!user) {
-        navigate('/login');
+        navigate('/dashboard');
         return;
       }
 
