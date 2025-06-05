@@ -116,7 +116,7 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-6 gap-8">
           {/* Calendar Section */}
           <div className="lg:col-span-3">
             <Card>
@@ -175,7 +175,7 @@ const Dashboard = () => {
           </div>
 
           {/* Todo List Section */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-3">
             <TodoList />
           </div>
         </div>

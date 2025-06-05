@@ -101,10 +101,10 @@ const LoginPage = () => {
               <p className="text-gray-600">
                 Don't have an account?{" "}
                 <button 
-                  onClick={() => navigate('/join')}
+                  onClick={() => navigate('/')}
                   className="text-religious-600 hover:text-religious-700 font-medium"
                 >
-                  Join ITREB
+                  Go Back
                 </button>
               </p>
             </div>

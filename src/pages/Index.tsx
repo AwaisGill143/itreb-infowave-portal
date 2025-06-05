@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { ChevronDown, ArrowRight, Calendar, Users, Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDown, ArrowRight, Calendar, Users, Briefcase, ChevronLeft, ChevronRight, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -10,17 +10,17 @@ const Index = () => {
 
   const whatsNewSlides = [
     {
-      image: "/lovable-uploads/5f16b4c8-ffdc-409e-b26b-2d39a0129655.png",
+      image: "/lovable-uploads/cc.jpg",
       title: "New Community Initiative Launch",
       text: "Join us in our latest community outreach program"
     },
     {
-      image: "/lovable-uploads/0e822d16-6581-441a-88df-1eccd5d3a275.png",
+      image: "/lovable-uploads/bb.jpg",
       title: "Educational Workshop Series",
       text: "Enhance your skills with our comprehensive workshops"
     },
     {
-      image: "/lovable-uploads/18b33cb0-b583-4e4e-b6a8-73d1ecd2ecb1.png",
+      image: "/lovable-uploads/cc.jpg",
       title: "Annual Conference 2024",
       text: "Register now for our biggest event of the year"
     }
@@ -76,25 +76,25 @@ const Index = () => {
 
   const achievements = [
     {
-      name: "Sarah Ahmed",
+      name: "Awais Gill",
       role: "Community Leader",
       image: "/placeholder.svg",
       description: "Leading community outreach programs for over 5 years"
     },
     {
-      name: "Dr. Hassan Ali",
+      name: "Afshad Sidhwa",
       role: "Educational Director",
       image: "/placeholder.svg",
       description: "Expert in curriculum development and educational leadership"
     },
     {
-      name: "Fatima Khan",
+      name: "Asadullah Nizami",
       role: "Youth Coordinator",
       image: "/placeholder.svg",
       description: "Passionate about youth development and mentorship"
     },
     {
-      name: "Omar Ibrahim",
+      name: "Misha Jessani",
       role: "Program Manager",
       image: "/placeholder.svg",
       description: "Specialized in event management and community engagement"
@@ -191,6 +191,11 @@ const Index = () => {
                   }`}
                 >
                   <div className="relative h-full bg-gradient-to-r from-religious-600 to-religious-800 flex items-center">
+                    <img
+                        src={slide.image}
+                        alt={slide.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
                     <div className="absolute inset-0 bg-black opacity-30"></div>
                     <div className="relative z-10 text-white p-12 max-w-2xl">
                       <h3 className="text-3xl font-bold mb-4">{slide.title}</h3>
@@ -306,13 +311,22 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-religious-800 text-white py-12">
         <div className="container mx-auto px-6 text-center">
+          <div className="flex items-center justify-center space-x-6">
           <button
-            onClick={scrollToTop}
+            
             className="inline-flex items-center space-x-2 bg-religious-600 hover:bg-religious-700 px-6 py-3 rounded-lg transition-colors"
           >
+
             <span>Contact Us</span>
-            <ArrowRight className="w-4 h-4" />
+            
           </button>
+          <button
+              onClick={scrollToTop}
+              className="inline-flex items-center space-x-2 bg-religious-600 hover:bg-religious-700 px-4 py-2 rounded-lg transition-colors ml-4"
+            >
+              <ArrowUp className="w-4 h-4" />
+              
+          </button></div>
           <div className="mt-8 pt-8 border-t border-religious-700">
             <p className="text-religious-200">&copy; 2025 ITREB. All rights reserved.</p>
           </div>
