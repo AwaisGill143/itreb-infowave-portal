@@ -51,7 +51,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
       setProfile(data);
     } catch (error) {
+      setProfile(null);
       console.error('Error loading profile:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,8 +65,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         loadProfile(session.user.id);
+      }else {
+    setLoading(false);
       }
-      setLoading(false);
+      
     });
 
     // Listen for auth changes
@@ -77,8 +82,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await loadProfile(session.user.id);
       } else {
         setProfile(null);
+        setLoading(false); // Reset profile if no user
       }
-      setLoading(false);
+      
     });
 
     return () => subscription.unsubscribe();
