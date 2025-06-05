@@ -84,17 +84,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      return { error };
-    } catch (error) {
-      return { error };
+const signIn = async (email: string, password: string) => {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) return { error };
+
+    // ✅ Manually set session & user
+    setSession(data.session);
+    setUser(data.session?.user ?? null);
+
+    if (data.session?.user) {
+      await loadProfile(data.session.user.id); // 🔥 Immediately fetch profile
     }
-  };
+
+    return { error: null };
+  } catch (error) {
+    return { error };
+  }
+};
 
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
