@@ -20,7 +20,7 @@ export type Database = {
           id: string
           "Last Name": string | null
           opportunity_id: string
-          Portfolio: string | null
+          Portfolio: Database["public"]["Enums"]["Portfolio_type"] | null
           "Religious Qualification": string | null
           resume_url: string | null
           "Secular Qualification": string | null
@@ -37,7 +37,7 @@ export type Database = {
           id?: string
           "Last Name"?: string | null
           opportunity_id: string
-          Portfolio?: string | null
+          Portfolio?: Database["public"]["Enums"]["Portfolio_type"] | null
           "Religious Qualification"?: string | null
           resume_url?: string | null
           "Secular Qualification"?: string | null
@@ -54,7 +54,7 @@ export type Database = {
           id?: string
           "Last Name"?: string | null
           opportunity_id?: string
-          Portfolio?: string | null
+          Portfolio?: Database["public"]["Enums"]["Portfolio_type"] | null
           "Religious Qualification"?: string | null
           resume_url?: string | null
           "Secular Qualification"?: string | null
@@ -158,7 +158,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
-          portfolio: Database["public"]["Enums"]["portfolio_type"] | null
+          portfolio: Database["public"]["Enums"]["Portfolio_type"] | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
@@ -167,7 +167,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
-          portfolio?: Database["public"]["Enums"]["portfolio_type"] | null
+          portfolio?: Database["public"]["Enums"]["Portfolio_type"] | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
@@ -176,7 +176,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
-          portfolio?: Database["public"]["Enums"]["portfolio_type"] | null
+          portfolio?: Database["public"]["Enums"]["Portfolio_type"] | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
@@ -226,6 +226,31 @@ export type Database = {
         | "marketing"
         | "operations"
         | "hr"
+      Portfolio_type:
+        | "Office Bearers"
+        | "Finance"
+        | "MIS and Access"
+        | "RECCU"
+        | "REDU"
+        | "Waez Unit"
+        | "IREU"
+        | "Academics"
+        | "Youth"
+        | "Jamati Affairs"
+        | "Communications"
+        | "MNE"
+        | "HRE"
+        | "PEDU"
+        | "HR"
+        | "Library and ICT"
+        | "Access"
+        | "ECD"
+        | "Distance Learning"
+        | "STEP"
+        | "PSU"
+        | "SFC"
+        | "Quran"
+        | "Special HRE"
       user_role: "board_member" | "applicant"
     }
     CompositeTypes: {
@@ -348,6 +373,32 @@ export const Constants = {
         "marketing",
         "operations",
         "hr",
+      ],
+      Portfolio_type: [
+        "Office Bearers",
+        "Finance",
+        "MIS and Access",
+        "RECCU",
+        "REDU",
+        "Waez Unit",
+        "IREU",
+        "Academics",
+        "Youth",
+        "Jamati Affairs",
+        "Communications",
+        "MNE",
+        "HRE",
+        "PEDU",
+        "HR",
+        "Library and ICT",
+        "Access",
+        "ECD",
+        "Distance Learning",
+        "STEP",
+        "PSU",
+        "SFC",
+        "Quran",
+        "Special HRE",
       ],
       user_role: ["board_member", "applicant"],
     },

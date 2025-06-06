@@ -3,10 +3,12 @@ import { useState, useEffect } from "react";
 import { ChevronDown, ArrowRight, Calendar, Users, Briefcase, ChevronLeft, ChevronRight, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useEvents } from "@/hooks/useEvents";
 
 const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [expandedOpportunity, setExpandedOpportunity] = useState<number | null>(null);
+  const { events, loading } = useEvents();
 
   const whatsNewSlides = [
     {
@@ -26,32 +28,13 @@ const Index = () => {
     }
   ];
 
-  const upcomingEvents = [
-    {
-      title: "Community Gathering",
-      date: "June 15, 2025",
-      location: "Main Hall",
-      description: "Monthly community meeting and discussion"
-    },
-    {
-      title: "Educational Seminar",
-      date: "June 22, 2025",
-      location: "Conference Room",
-      description: "Learning session on contemporary issues"
-    },
-    {
-      title: "Youth Workshop",
-      date: "June 30, 2025",
-      location: "Activity Center",
-      description: "Special workshop designed for young members"
-    },
-    {
-      title: "Annual Conference",
-      date: "July 5, 2025",
-      location: "Grand Auditorium",
-      description: "Our biggest annual gathering"
-    }
-  ];
+  // Filter events to show only upcoming events (future dates)
+  const upcomingEvents = events.filter(event => {
+    const eventDate = new Date(event.event_date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
+    return eventDate >= today;
+  }).slice(0, 4); // Show only first 4 upcoming events
 
   const opportunities = [
     {
@@ -117,6 +100,15 @@ const Index = () => {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const formatEventDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   return (
@@ -224,25 +216,34 @@ const Index = () => {
       <section id="upcoming-events" className="py-16 bg-white">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center text-religious-800 mb-12">Upcoming Events</h2>
-          <div className="relative">
-            <div className="overflow-x-auto">
-              <div className="flex space-x-6 pb-4" style={{ width: 'max-content' }}>
-                {upcomingEvents.map((event, index) => (
-                  <Card key={index} className="w-80 flex-shrink-0 hover:shadow-lg transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="w-full h-40 bg-gradient-to-br from-religious-100 to-religious-200 rounded-lg mb-4 flex items-center justify-center">
-                        <Calendar className="w-12 h-12 text-religious-600" />
-                      </div>
-                      <h3 className="text-xl font-semibold text-religious-800 mb-2">{event.title}</h3>
-                      <p className="text-religious-600 mb-1">{event.date}</p>
-                      <p className="text-gray-600 mb-3">{event.location}</p>
-                      <p className="text-gray-700">{event.description}</p>
-                    </CardContent>
-                  </Card>
-                ))}
+          {loading ? (
+            <div className="text-center text-gray-600">Loading events...</div>
+          ) : upcomingEvents.length > 0 ? (
+            <div className="relative">
+              <div className="overflow-x-auto">
+                <div className="flex space-x-6 pb-4" style={{ width: 'max-content' }}>
+                  {upcomingEvents.map((event, index) => (
+                    <Card key={event.id} className="w-80 flex-shrink-0 hover:shadow-lg transition-shadow">
+                      <CardContent className="p-6">
+                        <div className="w-full h-40 bg-gradient-to-br from-religious-100 to-religious-200 rounded-lg mb-4 flex items-center justify-center">
+                          <Calendar className="w-12 h-12 text-religious-600" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-religious-800 mb-2">{event.title}</h3>
+                        <p className="text-religious-600 mb-1">{formatEventDate(event.event_date)}</p>
+                        <p className="text-gray-600 mb-1">{event.start_time} - {event.end_time}</p>
+                        <p className="text-gray-600 mb-3">{event.venue}</p>
+                        {event.description && (
+                          <p className="text-gray-700">{event.description}</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="text-center text-gray-600">No upcoming events found.</div>
+          )}
         </div>
       </section>
 
