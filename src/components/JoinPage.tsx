@@ -7,8 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const JoinPage = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -21,16 +25,34 @@ const JoinPage = () => {
     skills: "",
     cv: null as File | null
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Portfolio options matching the Portfolio_type enum from Supabase
   const portfolioOptions = [
-    "Education & Training",
-    "Community Outreach",
-    "Youth Development",
-    "Religious Studies",
-    "Administration",
-    "Technology & Media",
-    "Healthcare",
-    "Social Services"
+    "Office Bearers",
+    "Finance",
+    "MIS and Access",
+    "RECCU",
+    "REDU",
+    "Waez Unit",
+    "IREU",
+    "Academics",
+    "Youth",
+    "Jamati Affairs",
+    "Communications",
+    "MNE",
+    "HRE",
+    "PEDU",
+    "HR",
+    "Library and ICT",
+    "Access",
+    "ECD",
+    "Distance Learning",
+    "STEP",
+    "PSU",
+    "SFC",
+    "Quran",
+    "Special HRE"
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -42,12 +64,114 @@ const JoinPage = () => {
     setFormData(prev => ({ ...prev, cv: file }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Here you would typically send the data to an API endpoint
-    // that would append the details to an Excel sheet
-    alert("Application submitted successfully! We will get back to you soon.");
+    setIsSubmitting(true);
+
+    try {
+      // Create a general opportunity entry (you might want to create a specific opportunity for general applications)
+      const { data: generalOpportunity, error: opportunityError } = await supabase
+        .from('opportunities')
+        .select('id')
+        .eq('job_title', 'General Application')
+        .eq('portfolio', formData.portfolio)
+        .single();
+
+      let opportunityId = generalOpportunity?.id;
+
+      // If no general opportunity exists for this portfolio, create one
+      if (!generalOpportunity) {
+        const { data: newOpportunity, error: createError } = await supabase
+          .from('opportunities')
+          .insert({
+            job_title: 'General Application',
+            description: 'General application for joining ITREB',
+            portfolio: formData.portfolio as any,
+            duration: 'Ongoing',
+            skill_requirement: 'As specified in application',
+            created_by: '00000000-0000-0000-0000-000000000000' // Default system user
+          })
+          .select('id')
+          .single();
+
+        if (createError) {
+          console.error('Error creating opportunity:', createError);
+          toast.error('Failed to process application');
+          return;
+        }
+        opportunityId = newOpportunity.id;
+      }
+
+      // Upload CV if provided
+      let resumeUrl = null;
+      if (formData.cv) {
+        const fileExt = formData.cv.name.split('.').pop();
+        const fileName = `${Date.now()}-${formData.firstName}-${formData.lastName}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('resumes')
+          .upload(fileName, formData.cv);
+
+        if (uploadError) {
+          console.error('Error uploading CV:', uploadError);
+          toast.error('Failed to upload CV');
+          return;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('resumes')
+          .getPublicUrl(fileName);
+        
+        resumeUrl = urlData.publicUrl;
+      }
+
+      // Insert application data
+      const { error: insertError } = await supabase
+        .from('applications')
+        .insert({
+          opportunity_id: opportunityId,
+          applicant_id: '00000000-0000-0000-0000-000000000000', // Default for public applications
+          'First name': formData.firstName,
+          'Last Name': formData.lastName,
+          email: formData.email,
+          Contact: parseFloat(formData.contactNumber) || null,
+          Age: parseFloat(formData.age) || null,
+          Portfolio: formData.portfolio as any,
+          'Secular Qualification': formData.secularQualification || null,
+          'Religious Qualification': formData.religiousQualification || null,
+          Skills: formData.skills || null,
+          resume_url: resumeUrl,
+          status: 'pending'
+        });
+
+      if (insertError) {
+        console.error('Error inserting application:', insertError);
+        toast.error('Failed to submit application');
+        return;
+      }
+
+      toast.success('Application submitted successfully! We will get back to you soon.');
+      
+      // Reset form
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        contactNumber: "",
+        age: "",
+        secularQualification: "",
+        religiousQualification: "",
+        portfolio: "",
+        skills: "",
+        cv: null
+      });
+
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -140,7 +264,7 @@ const JoinPage = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="portfolio" className="text-religious-700 font-medium">Portfolio *</Label>
-                  <Select onValueChange={(value) => handleInputChange("portfolio", value)}>
+                  <Select onValueChange={(value) => handleInputChange("portfolio", value)} required>
                     <SelectTrigger className="border-gray-300 focus:border-religious-500 focus:ring-religious-500">
                       <SelectValue placeholder="Select your area of interest" />
                     </SelectTrigger>
@@ -216,9 +340,10 @@ const JoinPage = () => {
               <div className="pt-6">
                 <Button 
                   type="submit" 
-                  className="w-full bg-religious-600 hover:bg-religious-700 text-white py-3 text-lg font-medium"
+                  disabled={isSubmitting}
+                  className="w-full bg-religious-600 hover:bg-religious-700 text-white py-3 text-lg font-medium disabled:opacity-50"
                 >
-                  Submit Application
+                  {isSubmitting ? 'Submitting...' : 'Submit Application'}
                 </Button>
               </div>
             </form>
@@ -228,7 +353,7 @@ const JoinPage = () => {
         {/* Back to Home */}
         <div className="text-center mt-8">
           <button 
-            onClick={() => window.location.href = '/'}
+            onClick={() => navigate('/')}
             className="text-religious-600 hover:text-religious-700 font-medium"
           >
             ← Back to Home

@@ -21,8 +21,7 @@ const Dashboard = () => {
       toast.error("Only board members can view applicants");
       return;
     }
-    console.log(`Downloading applicants for ${profile.portfolio} portfolio`);
-    toast.success(`Downloading applicants for ${profile.portfolio} portfolio`);
+    navigate("/view-applicants");
   };
 
   const handleResourceLibrary = () => {

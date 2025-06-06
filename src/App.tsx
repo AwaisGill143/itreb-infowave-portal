@@ -13,6 +13,7 @@ import JoinPage from "./components/JoinPage";
 import Dashboard from "./pages/Dashboard";
 import AddEvent from "./pages/AddEvent";
 import CreateOpportunity from "./pages/CreateOpportunity";
+import ViewApplicants from "./pages/ViewApplicants";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="board_member">
                   <CreateOpportunity />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/view-applicants" 
+              element={
+                <ProtectedRoute requiredRole="board_member">
+                  <ViewApplicants />
                 </ProtectedRoute>
               } 
             />
