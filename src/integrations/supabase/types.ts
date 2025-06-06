@@ -20,7 +20,7 @@ export type Database = {
           id: string
           "Last Name": string | null
           opportunity_id: string
-          Portfolio: Database["public"]["Enums"]["Portfolio_type"] | null
+          Portfolio: Database["public"]["Enums"]["Portfolio_type"]
           "Religious Qualification": string | null
           resume_url: string | null
           "Secular Qualification": string | null
@@ -37,7 +37,7 @@ export type Database = {
           id?: string
           "Last Name"?: string | null
           opportunity_id: string
-          Portfolio?: Database["public"]["Enums"]["Portfolio_type"] | null
+          Portfolio?: Database["public"]["Enums"]["Portfolio_type"]
           "Religious Qualification"?: string | null
           resume_url?: string | null
           "Secular Qualification"?: string | null
@@ -54,7 +54,7 @@ export type Database = {
           id?: string
           "Last Name"?: string | null
           opportunity_id?: string
-          Portfolio?: Database["public"]["Enums"]["Portfolio_type"] | null
+          Portfolio?: Database["public"]["Enums"]["Portfolio_type"]
           "Religious Qualification"?: string | null
           resume_url?: string | null
           "Secular Qualification"?: string | null
@@ -122,7 +122,7 @@ export type Database = {
           id: string
           is_active: boolean
           job_title: string
-          portfolio: Database["public"]["Enums"]["portfolio_type"]
+          portfolio: Database["public"]["Enums"]["Portfolio_type"]
           skill_requirement: string
           updated_at: string
         }
@@ -134,7 +134,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           job_title: string
-          portfolio: Database["public"]["Enums"]["portfolio_type"]
+          portfolio: Database["public"]["Enums"]["Portfolio_type"]
           skill_requirement: string
           updated_at?: string
         }
@@ -146,7 +146,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           job_title?: string
-          portfolio?: Database["public"]["Enums"]["portfolio_type"]
+          portfolio?: Database["public"]["Enums"]["Portfolio_type"]
           skill_requirement?: string
           updated_at?: string
         }
@@ -220,37 +220,32 @@ export type Database = {
       }
     }
     Enums: {
-      portfolio_type:
-        | "technology"
-        | "finance"
-        | "marketing"
-        | "operations"
-        | "hr"
       Portfolio_type:
-        | "Office Bearers"
-        | "Finance"
-        | "MIS and Access"
-        | "RECCU"
-        | "REDU"
-        | "Waez Unit"
-        | "IREU"
-        | "Academics"
-        | "Youth"
-        | "Jamati Affairs"
-        | "Communications"
-        | "MNE"
-        | "HRE"
-        | "PEDU"
-        | "HR"
-        | "Library and ICT"
-        | "Access"
-        | "ECD"
-        | "Distance Learning"
-        | "STEP"
-        | "PSU"
-        | "SFC"
-        | "Quran"
-        | "Special HRE"
+  | "Office Bearers"
+  | "Finance"
+  | "MIS and Access"
+  | "RECCU"
+  | "REDU"
+  | "Waez Unit"
+  | "IREU"
+  | "Academics"
+  | "Youth"
+  | "Jamati Affairs"
+  | "Communications"
+  | "MNE"
+  | "HRE"
+  | "PEDU"
+  | "HR"
+  | "Library and ICT"
+  | "Access"
+  | "ECD"
+  | "Distance Learning"
+  | "STEP"
+  | "PSU"
+  | "SFC"
+  | "Quran"
+  | "Special HRE"
+
       user_role: "board_member" | "applicant"
     }
     CompositeTypes: {
@@ -367,39 +362,33 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      portfolio_type: [
-        "technology",
-        "finance",
-        "marketing",
-        "operations",
-        "hr",
-      ],
       Portfolio_type: [
-        "Office Bearers",
-        "Finance",
-        "MIS and Access",
-        "RECCU",
-        "REDU",
-        "Waez Unit",
-        "IREU",
-        "Academics",
-        "Youth",
-        "Jamati Affairs",
-        "Communications",
-        "MNE",
-        "HRE",
-        "PEDU",
-        "HR",
-        "Library and ICT",
-        "Access",
-        "ECD",
-        "Distance Learning",
-        "STEP",
-        "PSU",
-        "SFC",
-        "Quran",
-        "Special HRE",
-      ],
+  "Office Bearers",
+  "Finance",
+  "MIS and Access",
+  "RECCU",
+  "REDU",
+  "Waez Unit",
+  "IREU",
+  "Academics",
+  "Youth",
+  "Jamati Affairs",
+  "Communications",
+  "MNE",
+  "HRE",
+  "PEDU",
+  "HR",
+  "Library and ICT",
+  "Access",
+  "ECD",
+  "Distance Learning",
+  "STEP",
+  "PSU",
+  "SFC",
+  "Quran",
+  "Special HRE"
+],
+
       user_role: ["board_member", "applicant"],
     },
   },
