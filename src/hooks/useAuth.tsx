@@ -2,13 +2,17 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
+
+// Use the actual Portfolio_type from the database schema
+type PortfolioType = Database['public']['Enums']['Portfolio_type'];
 
 interface Profile {
   id: string;
   full_name: string;
   email: string;
   role: 'board_member' | 'applicant';
-  portfolio?: 'technology' | 'finance' | 'marketing' | 'operations' | 'hr';
+  portfolio?: PortfolioType;
   created_at: string;
   updated_at: string;
 }
