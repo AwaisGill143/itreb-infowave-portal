@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,7 @@ const JoinPage = () => {
     age: "",
     secularQualification: "",
     religiousQualification: "",
-    portfolio: "" as PortfolioType | "",
+    portfolio: null as PortfolioType | null,
     skills: "",
     cv: null as File | null
   });
@@ -130,6 +131,12 @@ const JoinPage = () => {
     
     if (!validateForm()) {
       console.log('Form validation failed');
+      return;
+    }
+
+    // Additional check to ensure portfolio is selected
+    if (!formData.portfolio) {
+      toast.error('Please select a portfolio');
       return;
     }
 
@@ -243,7 +250,7 @@ const JoinPage = () => {
         age: "",
         secularQualification: "",
         religiousQualification: "",
-        portfolio: "",
+        portfolio: null,
         skills: "",
         cv: null
       });
@@ -351,7 +358,7 @@ const JoinPage = () => {
                 <div className="space-y-2">
                   <Label htmlFor="portfolio" className="text-religious-700 font-medium">Portfolio *</Label>
                   <Select 
-                    value={formData.portfolio} 
+                    value={formData.portfolio || ""} 
                     onValueChange={handlePortfolioChange}
                     required
                   >
