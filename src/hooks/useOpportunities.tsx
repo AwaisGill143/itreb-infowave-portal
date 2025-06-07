@@ -3,13 +3,17 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { Database } from '@/integrations/supabase/types';
+
+// Use the actual Portfolio_type from the database schema
+type PortfolioType = Database['public']['Enums']['Portfolio_type'];
 
 interface Opportunity {
   id: string;
   job_title: string;
   description: string;
   duration: string;
-  portfolio: 'technology' | 'finance' | 'marketing' | 'operations' | 'hr';
+  portfolio: PortfolioType | null;
   skill_requirement: string;
   is_active: boolean;
   created_by: string;

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,10 @@ import { Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Database } from '@/integrations/supabase/types';
+
+// Use the actual Portfolio_type from the database schema
+type PortfolioType = Database['public']['Enums']['Portfolio_type'];
 
 const JoinPage = () => {
   const navigate = useNavigate();
@@ -21,14 +24,14 @@ const JoinPage = () => {
     age: "",
     secularQualification: "",
     religiousQualification: "",
-    portfolio: "",
+    portfolio: "" as PortfolioType | "",
     skills: "",
     cv: null as File | null
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Portfolio options matching the Portfolio_type enum from Supabase
-  const portfolioOptions = [
+  const portfolioOptions: PortfolioType[] = [
     "Office Bearers",
     "Finance",
     "MIS and Access",
@@ -58,6 +61,11 @@ const JoinPage = () => {
   const handleInputChange = (field: string, value: string) => {
     console.log(`Updating ${field} with value:`, value);
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePortfolioChange = (value: PortfolioType) => {
+    console.log(`Updating portfolio with value:`, value);
+    setFormData(prev => ({ ...prev, portfolio: value }));
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,7 +158,7 @@ const JoinPage = () => {
           .insert({
             job_title: 'General Application',
             description: 'General application for joining ITREB',
-            portfolio: formData.portfolio as any,
+            portfolio: formData.portfolio,
             duration: 'Ongoing',
             skill_requirement: 'As specified in application',
             created_by: '00000000-0000-0000-0000-000000000000'
@@ -202,7 +210,7 @@ const JoinPage = () => {
         email: formData.email.trim(),
         Contact: parseFloat(formData.contactNumber) || null,
         Age: parseFloat(formData.age) || null,
-        Portfolio: formData.portfolio as any,
+        Portfolio: formData.portfolio,
         'Secular Qualification': formData.secularQualification.trim() || null,
         'Religious Qualification': formData.religiousQualification.trim() || null,
         Skills: formData.skills.trim() || null,
@@ -344,7 +352,7 @@ const JoinPage = () => {
                   <Label htmlFor="portfolio" className="text-religious-700 font-medium">Portfolio *</Label>
                   <Select 
                     value={formData.portfolio} 
-                    onValueChange={(value) => handleInputChange("portfolio", value)} 
+                    onValueChange={handlePortfolioChange}
                     required
                   >
                     <SelectTrigger className="border-gray-300 focus:border-religious-500 focus:ring-religious-500">
