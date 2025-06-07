@@ -19,7 +19,7 @@ export type Database = {
           "First name": string | null
           id: string
           "Last Name": string | null
-          opportunity_id: string
+          opportunity_id: string | null
           Portfolio: Database["public"]["Enums"]["Portfolio_type"] | null
           "Religious Qualification": string | null
           resume_url: string | null
@@ -36,7 +36,7 @@ export type Database = {
           "First name"?: string | null
           id?: string
           "Last Name"?: string | null
-          opportunity_id: string
+          opportunity_id?: string | null
           Portfolio?: Database["public"]["Enums"]["Portfolio_type"] | null
           "Religious Qualification"?: string | null
           resume_url?: string | null
@@ -53,7 +53,7 @@ export type Database = {
           "First name"?: string | null
           id?: string
           "Last Name"?: string | null
-          opportunity_id?: string
+          opportunity_id?: string | null
           Portfolio?: Database["public"]["Enums"]["Portfolio_type"] | null
           "Religious Qualification"?: string | null
           resume_url?: string | null

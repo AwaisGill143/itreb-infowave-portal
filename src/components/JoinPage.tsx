@@ -143,7 +143,7 @@ const JoinPage = () => {
     setIsSubmitting(true);
 
     try {
-      console.log('Starting database operations...');
+      console.log('Starting application submission...');
 
       // Upload CV if provided
       let resumeUrl = null;
@@ -170,56 +170,10 @@ const JoinPage = () => {
         console.log('CV uploaded successfully:', resumeUrl);
       }
 
-      // Create a general opportunity entry first (without RLS restrictions)
-      const { data: generalOpportunity, error: opportunityError } = await supabase
-        .from('opportunities')
-        .insert({
-          job_title: 'General Application',
-          description: `General application for joining ITREB - ${formData.portfolio} portfolio`,
-          portfolio: formData.portfolio,
-          duration: 'Ongoing',
-          skill_requirement: 'As specified in application',
-          created_by: '00000000-0000-0000-0000-000000000000', // System user
-          is_active: true
-        })
-        .select('id')
-        .single();
-
-      let opportunityId;
-      if (opportunityError) {
-        console.error('Error creating opportunity, trying to find existing one:', opportunityError);
-        
-        // Try to find an existing general opportunity for this portfolio
-        const { data: existingOpportunity, error: findError } = await supabase
-          .from('opportunities')
-          .select('id')
-          .eq('job_title', 'General Application')
-          .eq('portfolio', formData.portfolio)
-          .eq('is_active', true)
-          .maybeSingle();
-
-        if (findError) {
-          console.error('Error finding existing opportunity:', findError);
-          toast.error('Failed to process application. Please try again.');
-          return;
-        }
-
-        if (!existingOpportunity) {
-          toast.error('Failed to create application opportunity. Please try again.');
-          return;
-        }
-        
-        opportunityId = existingOpportunity.id;
-      } else {
-        opportunityId = generalOpportunity.id;
-      }
-
-      console.log('Using opportunity ID:', opportunityId);
-
       // Prepare application data with better contact number handling
       const contactNum = formData.contactNumber.replace(/\D/g, ''); // Remove non-digits
       const applicationData = {
-        opportunity_id: opportunityId,
+        opportunity_id: null, // For general membership applications
         applicant_id: '00000000-0000-0000-0000-000000000000', // System user for now
         'First name': formData.firstName.trim(),
         'Last Name': formData.lastName.trim(),
@@ -236,7 +190,7 @@ const JoinPage = () => {
 
       console.log('Inserting application data:', applicationData);
 
-      // Insert application data
+      // Insert application data directly (no need for opportunity creation)
       const { error: insertError } = await supabase
         .from('applications')
         .insert(applicationData);
