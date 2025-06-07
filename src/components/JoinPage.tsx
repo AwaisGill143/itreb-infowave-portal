@@ -145,44 +145,6 @@ const JoinPage = () => {
     try {
       console.log('Starting database operations...');
 
-      // Create a general opportunity entry if it doesn't exist
-      let { data: generalOpportunity, error: opportunityError } = await supabase
-        .from('opportunities')
-        .select('id')
-        .eq('job_title', 'General Application')
-        .eq('portfolio', formData.portfolio)
-        .maybeSingle();
-
-      console.log('Existing opportunity check:', { generalOpportunity, opportunityError });
-
-      let opportunityId = generalOpportunity?.id;
-
-      // If no general opportunity exists for this portfolio, create one
-      if (!generalOpportunity) {
-        console.log('Creating new opportunity...');
-        const { data: newOpportunity, error: createError } = await supabase
-          .from('opportunities')
-          .insert({
-            job_title: 'General Application',
-            description: 'General application for joining ITREB',
-            portfolio: formData.portfolio,
-            duration: 'Ongoing',
-            skill_requirement: 'As specified in application',
-            created_by: '00000000-0000-0000-0000-000000000000'
-          })
-          .select('id')
-          .single();
-
-        if (createError) {
-          console.error('Error creating opportunity:', createError);
-          toast.error('Failed to process application. Please try again.');
-          return;
-        }
-        
-        console.log('New opportunity created:', newOpportunity);
-        opportunityId = newOpportunity.id;
-      }
-
       // Upload CV if provided
       let resumeUrl = null;
       if (formData.cv) {
@@ -208,15 +170,62 @@ const JoinPage = () => {
         console.log('CV uploaded successfully:', resumeUrl);
       }
 
-      // Prepare application data
+      // Create a general opportunity entry first (without RLS restrictions)
+      const { data: generalOpportunity, error: opportunityError } = await supabase
+        .from('opportunities')
+        .insert({
+          job_title: 'General Application',
+          description: `General application for joining ITREB - ${formData.portfolio} portfolio`,
+          portfolio: formData.portfolio,
+          duration: 'Ongoing',
+          skill_requirement: 'As specified in application',
+          created_by: '00000000-0000-0000-0000-000000000000', // System user
+          is_active: true
+        })
+        .select('id')
+        .single();
+
+      let opportunityId;
+      if (opportunityError) {
+        console.error('Error creating opportunity, trying to find existing one:', opportunityError);
+        
+        // Try to find an existing general opportunity for this portfolio
+        const { data: existingOpportunity, error: findError } = await supabase
+          .from('opportunities')
+          .select('id')
+          .eq('job_title', 'General Application')
+          .eq('portfolio', formData.portfolio)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (findError) {
+          console.error('Error finding existing opportunity:', findError);
+          toast.error('Failed to process application. Please try again.');
+          return;
+        }
+
+        if (!existingOpportunity) {
+          toast.error('Failed to create application opportunity. Please try again.');
+          return;
+        }
+        
+        opportunityId = existingOpportunity.id;
+      } else {
+        opportunityId = generalOpportunity.id;
+      }
+
+      console.log('Using opportunity ID:', opportunityId);
+
+      // Prepare application data with better contact number handling
+      const contactNum = formData.contactNumber.replace(/\D/g, ''); // Remove non-digits
       const applicationData = {
         opportunity_id: opportunityId,
-        applicant_id: '00000000-0000-0000-0000-000000000000',
+        applicant_id: '00000000-0000-0000-0000-000000000000', // System user for now
         'First name': formData.firstName.trim(),
         'Last Name': formData.lastName.trim(),
         email: formData.email.trim(),
-        Contact: parseFloat(formData.contactNumber) || null,
-        Age: parseFloat(formData.age) || null,
+        Contact: contactNum ? parseFloat(contactNum) : null,
+        Age: parseInt(formData.age),
         Portfolio: formData.portfolio,
         'Secular Qualification': formData.secularQualification.trim() || null,
         'Religious Qualification': formData.religiousQualification.trim() || null,
