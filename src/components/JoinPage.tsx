@@ -56,31 +56,95 @@ const JoinPage = () => {
   ];
 
   const handleInputChange = (field: string, value: string) => {
+    console.log(`Updating ${field} with value:`, value);
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+    console.log('File selected:', file?.name);
     setFormData(prev => ({ ...prev, cv: file }));
+  };
+
+  const validateForm = () => {
+    console.log('Validating form with data:', formData);
+    
+    if (!formData.firstName.trim()) {
+      toast.error('First name is required');
+      return false;
+    }
+    
+    if (!formData.lastName.trim()) {
+      toast.error('Last name is required');
+      return false;
+    }
+    
+    if (!formData.email.trim()) {
+      toast.error('Email is required');
+      return false;
+    }
+    
+    if (!formData.contactNumber.trim()) {
+      toast.error('Contact number is required');
+      return false;
+    }
+    
+    if (!formData.age.trim()) {
+      toast.error('Age is required');
+      return false;
+    }
+    
+    if (!formData.portfolio) {
+      toast.error('Please select a portfolio');
+      return false;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error('Please enter a valid email address');
+      return false;
+    }
+
+    // Validate age is a number
+    const ageNum = parseInt(formData.age);
+    if (isNaN(ageNum) || ageNum < 18 || ageNum > 100) {
+      toast.error('Please enter a valid age between 18 and 100');
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submission started');
+    
+    if (!validateForm()) {
+      console.log('Form validation failed');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Create a general opportunity entry (you might want to create a specific opportunity for general applications)
-      const { data: generalOpportunity, error: opportunityError } = await supabase
+      console.log('Starting database operations...');
+
+      // Create a general opportunity entry if it doesn't exist
+      let { data: generalOpportunity, error: opportunityError } = await supabase
         .from('opportunities')
         .select('id')
         .eq('job_title', 'General Application')
         .eq('portfolio', formData.portfolio)
-        .single();
+        .maybeSingle();
+
+      console.log('Existing opportunity check:', { generalOpportunity, opportunityError });
 
       let opportunityId = generalOpportunity?.id;
 
       // If no general opportunity exists for this portfolio, create one
       if (!generalOpportunity) {
+        console.log('Creating new opportunity...');
         const { data: newOpportunity, error: createError } = await supabase
           .from('opportunities')
           .insert({
@@ -89,22 +153,25 @@ const JoinPage = () => {
             portfolio: formData.portfolio as any,
             duration: 'Ongoing',
             skill_requirement: 'As specified in application',
-            created_by: '00000000-0000-0000-0000-000000000000' // Default system user
+            created_by: '00000000-0000-0000-0000-000000000000'
           })
           .select('id')
           .single();
 
         if (createError) {
           console.error('Error creating opportunity:', createError);
-          toast.error('Failed to process application');
+          toast.error('Failed to process application. Please try again.');
           return;
         }
+        
+        console.log('New opportunity created:', newOpportunity);
         opportunityId = newOpportunity.id;
       }
 
       // Upload CV if provided
       let resumeUrl = null;
       if (formData.cv) {
+        console.log('Uploading CV...');
         const fileExt = formData.cv.name.split('.').pop();
         const fileName = `${Date.now()}-${formData.firstName}-${formData.lastName}.${fileExt}`;
         
@@ -114,7 +181,7 @@ const JoinPage = () => {
 
         if (uploadError) {
           console.error('Error uploading CV:', uploadError);
-          toast.error('Failed to upload CV');
+          toast.error('Failed to upload CV. Please try again.');
           return;
         }
 
@@ -123,33 +190,40 @@ const JoinPage = () => {
           .getPublicUrl(fileName);
         
         resumeUrl = urlData.publicUrl;
+        console.log('CV uploaded successfully:', resumeUrl);
       }
+
+      // Prepare application data
+      const applicationData = {
+        opportunity_id: opportunityId,
+        applicant_id: '00000000-0000-0000-0000-000000000000',
+        'First name': formData.firstName.trim(),
+        'Last Name': formData.lastName.trim(),
+        email: formData.email.trim(),
+        Contact: parseFloat(formData.contactNumber) || null,
+        Age: parseFloat(formData.age) || null,
+        Portfolio: formData.portfolio as any,
+        'Secular Qualification': formData.secularQualification.trim() || null,
+        'Religious Qualification': formData.religiousQualification.trim() || null,
+        Skills: formData.skills.trim() || null,
+        resume_url: resumeUrl,
+        status: 'pending'
+      };
+
+      console.log('Inserting application data:', applicationData);
 
       // Insert application data
       const { error: insertError } = await supabase
         .from('applications')
-        .insert({
-          opportunity_id: opportunityId,
-          applicant_id: '00000000-0000-0000-0000-000000000000', // Default for public applications
-          'First name': formData.firstName,
-          'Last Name': formData.lastName,
-          email: formData.email,
-          Contact: parseFloat(formData.contactNumber) || null,
-          Age: parseFloat(formData.age) || null,
-          Portfolio: formData.portfolio as any,
-          'Secular Qualification': formData.secularQualification || null,
-          'Religious Qualification': formData.religiousQualification || null,
-          Skills: formData.skills || null,
-          resume_url: resumeUrl,
-          status: 'pending'
-        });
+        .insert(applicationData);
 
       if (insertError) {
         console.error('Error inserting application:', insertError);
-        toast.error('Failed to submit application');
+        toast.error('Failed to submit application. Please check all fields and try again.');
         return;
       }
 
+      console.log('Application submitted successfully');
       toast.success('Application submitted successfully! We will get back to you soon.');
       
       // Reset form
@@ -166,9 +240,13 @@ const JoinPage = () => {
         cv: null
       });
 
+      // Reset file input
+      const fileInput = document.getElementById('cv') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
     } catch (error) {
       console.error('Unexpected error:', error);
-      toast.error('An unexpected error occurred');
+      toast.error('An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -264,11 +342,15 @@ const JoinPage = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="portfolio" className="text-religious-700 font-medium">Portfolio *</Label>
-                  <Select onValueChange={(value) => handleInputChange("portfolio", value)} required>
+                  <Select 
+                    value={formData.portfolio} 
+                    onValueChange={(value) => handleInputChange("portfolio", value)} 
+                    required
+                  >
                     <SelectTrigger className="border-gray-300 focus:border-religious-500 focus:ring-religious-500">
                       <SelectValue placeholder="Select your area of interest" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       {portfolioOptions.map((option) => (
                         <SelectItem key={option} value={option}>
                           {option}
