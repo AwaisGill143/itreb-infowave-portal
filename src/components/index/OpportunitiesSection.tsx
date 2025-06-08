@@ -4,13 +4,19 @@ import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useOpportunities } from "@/hooks/useOpportunities";
+import { useNavigate } from "react-router-dom";
 
 const OpportunitiesSection = () => {
+  const navigate = useNavigate();
   const [expandedOpportunity, setExpandedOpportunity] = useState<number | null>(null);
   const { opportunities, loading } = useOpportunities();
 
   // Filter only active opportunities for public display
   const activeOpportunities = opportunities.filter(opp => opp.is_active);
+
+  const handleApplyNow = (opportunityId: string) => {
+    navigate(`/join?opportunityId=${opportunityId}`);
+  };
 
   if (loading) {
     return (
@@ -61,7 +67,13 @@ const OpportunitiesSection = () => {
                         <h4 className="font-semibold text-gray-800 mb-2">Required Skills:</h4>
                         <p className="text-gray-700">{opportunity.skill_requirement}</p>
                       </div>
-                      <Button className="bg-religious-600 hover:bg-religious-700">
+                      <Button 
+                        className="bg-religious-600 hover:bg-religious-700"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleApplyNow(opportunity.id);
+                        }}
+                      >
                         Apply Now
                       </Button>
                     </div>

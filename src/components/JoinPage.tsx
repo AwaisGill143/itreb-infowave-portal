@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Database } from '@/integrations/supabase/types';
 
 // Use the actual Portfolio_type from the database schema
@@ -17,6 +17,9 @@ type PortfolioType = Database['public']['Enums']['Portfolio_type'];
 
 const JoinPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const opportunityId = searchParams.get('opportunityId');
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -59,6 +62,39 @@ const JoinPage = () => {
     "Special HRE"
   ];
 
+  // Load opportunity details if opportunityId is provided
+  useEffect(() => {
+    if (opportunityId) {
+      loadOpportunityDetails(opportunityId);
+    }
+  }, [opportunityId]);
+
+  const loadOpportunityDetails = async (id: string) => {
+    try {
+      const { data: opportunity, error } = await supabase
+        .from('opportunities')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error loading opportunity:', error);
+        toast.error('Failed to load opportunity details');
+        return;
+      }
+
+      if (opportunity && opportunity.portfolio) {
+        setFormData(prev => ({
+          ...prev,
+          portfolio: opportunity.portfolio as PortfolioType
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading opportunity:', error);
+      toast.error('Failed to load opportunity details');
+    }
+  };
+
   const handleInputChange = (field: string, value: string) => {
     console.log(`Updating ${field} with value:`, value);
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -71,7 +107,28 @@ const JoinPage = () => {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    console.log('File selected:', file?.name);
+    console.log('File selected:', file?.name, 'Size:', file?.size, 'Type:', file?.type);
+    
+    if (file) {
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB');
+        return;
+      }
+      
+      // Validate file type
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please upload a PDF, DOC, or DOCX file');
+        return;
+      }
+    }
+    
     setFormData(prev => ({ ...prev, cv: file }));
   };
 
@@ -134,7 +191,6 @@ const JoinPage = () => {
       return;
     }
 
-    // Additional check to ensure portfolio is selected
     if (!formData.portfolio) {
       toast.error('Please select a portfolio');
       return;
@@ -148,20 +204,31 @@ const JoinPage = () => {
       // Upload CV if provided
       let resumeUrl = null;
       if (formData.cv) {
-        console.log('Uploading CV...');
+        console.log('Uploading CV...', formData.cv.name);
+        
+        // Create a unique filename with timestamp
         const fileExt = formData.cv.name.split('.').pop();
-        const fileName = `${Date.now()}-${formData.firstName}-${formData.lastName}.${fileExt}`;
+        const timestamp = Date.now();
+        const fileName = `${timestamp}-${formData.firstName.replace(/\s+/g, '')}-${formData.lastName.replace(/\s+/g, '')}.${fileExt}`;
+        
+        console.log('Uploading file as:', fileName);
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('resumes')
-          .upload(fileName, formData.cv);
+          .upload(fileName, formData.cv, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
         if (uploadError) {
           console.error('Error uploading CV:', uploadError);
-          toast.error('Failed to upload CV. Please try again.');
+          toast.error(`Failed to upload CV: ${uploadError.message}`);
           return;
         }
 
+        console.log('Upload successful:', uploadData);
+
+        // Get the public URL
         const { data: urlData } = supabase.storage
           .from('resumes')
           .getPublicUrl(fileName);
@@ -173,7 +240,7 @@ const JoinPage = () => {
       // Prepare application data with better contact number handling
       const contactNum = formData.contactNumber.replace(/\D/g, ''); // Remove non-digits
       const applicationData = {
-        opportunity_id: null, // For general membership applications
+        opportunity_id: opportunityId || null, // Use the opportunity ID from URL or null for general applications
         applicant_id: '00000000-0000-0000-0000-000000000000', // System user for now
         'First name': formData.firstName.trim(),
         'Last Name': formData.lastName.trim(),
@@ -190,7 +257,7 @@ const JoinPage = () => {
 
       console.log('Inserting application data:', applicationData);
 
-      // Insert application data directly (no need for opportunity creation)
+      // Insert application data
       const { error: insertError } = await supabase
         .from('applications')
         .insert(applicationData);
@@ -241,17 +308,23 @@ const JoinPage = () => {
             </div>
             <span className="text-3xl font-bold text-religious-800">ITREB</span>
           </div>
-          <h1 className="text-4xl font-bold text-religious-800 mb-4">Join Our Community</h1>
+          <h1 className="text-4xl font-bold text-religious-800 mb-4">
+            {opportunityId ? 'Apply for Opportunity' : 'Join Our Community'}
+          </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            We welcome individuals who are passionate about serving the community and making a positive impact. 
-            Please fill out this form to begin your journey with ITREB.
+            {opportunityId 
+              ? 'Complete this form to apply for the selected opportunity.' 
+              : 'We welcome individuals who are passionate about serving the community and making a positive impact. Please fill out this form to begin your journey with ITREB.'
+            }
           </p>
         </div>
 
         {/* Form */}
         <Card className="max-w-4xl mx-auto shadow-xl">
           <CardHeader className="bg-gradient-to-r from-religious-600 to-religious-700 text-white">
-            <CardTitle className="text-2xl text-center">Membership Application</CardTitle>
+            <CardTitle className="text-2xl text-center">
+              {opportunityId ? 'Opportunity Application' : 'Membership Application'}
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
