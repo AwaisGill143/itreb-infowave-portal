@@ -100,9 +100,11 @@ const JoinPage = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handlePortfolioChange = (value: PortfolioType) => {
+  const handlePortfolioChange = (value: string) => {
     console.log(`Updating portfolio with value:`, value);
-    setFormData(prev => ({ ...prev, portfolio: value }));
+    // Ensure the value is a valid PortfolioType
+    const portfolioValue = portfolioOptions.includes(value as PortfolioType) ? value as PortfolioType : null;
+    setFormData(prev => ({ ...prev, portfolio: portfolioValue }));
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -179,6 +181,14 @@ const JoinPage = () => {
       return false;
     }
 
+    // Validate contact number contains only digits and is reasonable length
+    const cleanContactNumber = formData.contactNumber.replace(/\D/g, '');
+    if (cleanContactNumber.length < 10 || cleanContactNumber.length > 15) {
+      toast.error('Please enter a valid contact number (10-15 digits)');
+      return false;
+    }
+
+    console.log('Form validation passed');
     return true;
   };
 
@@ -188,11 +198,6 @@ const JoinPage = () => {
     
     if (!validateForm()) {
       console.log('Form validation failed');
-      return;
-    }
-
-    if (!formData.portfolio) {
-      toast.error('Please select a portfolio');
       return;
     }
 
@@ -237,7 +242,7 @@ const JoinPage = () => {
         console.log('CV uploaded successfully:', resumeUrl);
       }
 
-      // Prepare application data with better contact number handling
+      // Prepare application data with better handling
       const contactNum = formData.contactNumber.replace(/\D/g, ''); // Remove non-digits
       const applicationData = {
         opportunity_id: opportunityId || null, // Use the opportunity ID from URL or null for general applications
@@ -245,7 +250,7 @@ const JoinPage = () => {
         'First name': formData.firstName.trim(),
         'Last Name': formData.lastName.trim(),
         email: formData.email.trim(),
-        Contact: contactNum ? parseFloat(contactNum) : null,
+        Contact: contactNum ? parseInt(contactNum) : null, // Use parseInt instead of parseFloat
         Age: parseInt(formData.age),
         Portfolio: formData.portfolio,
         'Secular Qualification': formData.secularQualification.trim() || null,
@@ -264,7 +269,7 @@ const JoinPage = () => {
 
       if (insertError) {
         console.error('Error inserting application:', insertError);
-        toast.error('Failed to submit application. Please check all fields and try again.');
+        toast.error(`Failed to submit application: ${insertError.message}`);
         return;
       }
 
