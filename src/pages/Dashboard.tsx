@@ -10,6 +10,7 @@ import { useEvents } from "@/hooks/useEvents";
 import { toast } from "sonner";
 import TodoList from "@/components/TodoList";
 import RemoveEventDialog from "@/components/RemoveEventDialog";
+import RemoveOpportunityDialog from "@/components/RemoveOpportunityDialog";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -72,6 +73,7 @@ const Dashboard = () => {
                   >
                     Create Opportunity
                   </Button>
+                  <RemoveOpportunityDialog />
                   <Button 
                     onClick={handleViewApplicants}
                     variant="outline"
