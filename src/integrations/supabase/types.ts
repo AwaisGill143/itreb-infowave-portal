@@ -12,7 +12,6 @@ export type Database = {
       applications: {
         Row: {
           Age: number | null
-          applicant_id: string
           applied_at: string
           Contact: number | null
           email: string | null
@@ -29,7 +28,6 @@ export type Database = {
         }
         Insert: {
           Age?: number | null
-          applicant_id: string
           applied_at?: string
           Contact?: number | null
           email?: string | null
@@ -46,7 +44,6 @@ export type Database = {
         }
         Update: {
           Age?: number | null
-          applicant_id?: string
           applied_at?: string
           Contact?: number | null
           email?: string | null

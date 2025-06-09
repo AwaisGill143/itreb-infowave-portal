@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -242,11 +241,10 @@ const JoinPage = () => {
         console.log('CV uploaded successfully:', resumeUrl);
       }
 
-      // Prepare application data with better handling
+      // Prepare application data - removed applicant_id
       const contactNum = formData.contactNumber.replace(/\D/g, ''); // Remove non-digits
       const applicationData = {
         opportunity_id: opportunityId || null, // Use the opportunity ID from URL or null for general applications
-        applicant_id: '00000000-0000-0000-0000-000000000000', // System user for now
         'First name': formData.firstName.trim(),
         'Last Name': formData.lastName.trim(),
         email: formData.email.trim(),
