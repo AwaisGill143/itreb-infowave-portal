@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEvents } from "@/hooks/useEvents";
 import { toast } from "sonner";
 import TodoList from "@/components/TodoList";
+import RemoveEventDialog from "@/components/RemoveEventDialog";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -161,9 +162,7 @@ const Dashboard = () => {
                     >
                       Add Event
                     </Button>
-                    <Button variant="outline">
-                      Remove Event
-                    </Button>
+                    <RemoveEventDialog />
                     <Button variant="outline">
                       Add Images
                     </Button>
