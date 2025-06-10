@@ -62,6 +62,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Auto sign-out on tab switch detection
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // User switched away from tab
+        localStorage.setItem('tabSwitched', 'true');
+      } else {
+        // User returned to tab
+        const tabSwitched = localStorage.getItem('tabSwitched');
+        if (tabSwitched === 'true' && user) {
+          console.log('Tab switch detected, signing out user');
+          localStorage.removeItem('tabSwitched');
+          signOut();
+        }
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('tabSwitched');
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [user]);
+
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -69,10 +99,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         loadProfile(session.user.id);
-      }else {
-    setLoading(false);
+      } else {
+        setLoading(false);
       }
-      
     });
 
     // Listen for auth changes
@@ -86,36 +115,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await loadProfile(session.user.id);
       } else {
         setProfile(null);
-        setLoading(false); // Reset profile if no user
+        setLoading(false);
       }
-      
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-const signIn = async (email: string, password: string) => {
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) return { error };
+      if (error) return { error };
 
-    // ✅ Manually set session & user
-    setSession(data.session);
-    setUser(data.session?.user ?? null);
+      // Clear any tab switch flags on successful login
+      localStorage.removeItem('tabSwitched');
 
-    if (data.session?.user) {
-      await loadProfile(data.session.user.id); // 🔥 Immediately fetch profile
+      setSession(data.session);
+      setUser(data.session?.user ?? null);
+
+      if (data.session?.user) {
+        await loadProfile(data.session.user.id);
+      }
+
+      return { error: null };
+    } catch (error) {
+      return { error };
     }
-
-    return { error: null };
-  } catch (error) {
-    return { error };
-  }
-};
+  };
 
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
@@ -135,6 +165,8 @@ const signIn = async (email: string, password: string) => {
   };
 
   const signOut = async () => {
+    // Clear tab switch flag
+    localStorage.removeItem('tabSwitched');
     await supabase.auth.signOut();
   };
 
